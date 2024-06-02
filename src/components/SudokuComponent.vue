@@ -1,20 +1,42 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col v-for="(row, rowIndex) in sudokuGrid" :key="rowIndex" cols="12">
-        <v-row>
-          <v-col v-for="(cell, colIndex) in row" :key="colIndex" cols="1" class="sudoku-cell">
-            <v-text-field v-model="sudokuGrid[rowIndex][colIndex]" :readonly="isReadonly(rowIndex, colIndex)"
-              class="sudoku-input" type="number" min="1" max="9" hide-details></v-text-field>
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
-  </v-container>
+  <div class="sudoku-container">
+    <div v-for="(row, rowIndex) in cells" :key="rowIndex" class="sudoku-row">
+      <div v-for="(cell, colIndex) in row" :key="colIndex" class="sudoku-cell">
+        <v-btn 
+          class="sudoku-input" 
+          variant="text"
+          block
+          height="100%"
+        >
+          {{ cell.value }}
+          <v-overlay
+            v-model="cell.overlay"
+            activator="parent"
+            location-strategy="connected"
+            location="center"
+            min-width="300%"
+          >
+            <NumpadComponent 
+              v-model="cell.value" 
+              @update:modelValue="cell.overlay = false"
+            >
+            </NumpadComponent>
+          </v-overlay>
+        </v-btn>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import NumpadComponent from './NumpadComponent.vue';
+
+
+class SudokuCell {
+  value = 0
+  overlay = false
+}
 
 // Initialize a sample Sudoku puzzle (0 represents empty cells)
 const sudokuGrid = ref([
@@ -29,19 +51,50 @@ const sudokuGrid = ref([
   [0, 0, 0, 0, 8, 0, 0, 7, 9]
 ]);
 
-const initialGrid = JSON.parse(JSON.stringify(sudokuGrid.value));
+const cells = ref(sudokuGrid.value.map(row => row.map(cell => new SudokuCell(cell))))
 
-const isReadonly = (rowIndex, colIndex) => {
-  return initialGrid[rowIndex][colIndex] !== 0;
-};
 </script>
 
 <style scoped>
 .sudoku-cell {
-  padding: 2px;
+  padding: 0;
+  flex: 1;
+  border: 1px solid #ccc;
+}
+
+.sudoku-cell:nth-child(3n) {
+  border-right: 2px solid #000;
+}
+
+.sudoku-cell:nth-child(1) {
+  border-left: 2px solid #000;
+}
+
+.sudoku-row:nth-child(3n) {
+  border-bottom: 2px solid #000;
+}
+
+.sudoku-row:nth-child(1) {
+  border-top: 2px solid #000;
+}
+
+.sudoku-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Adjust as needed */
+  aspect-ratio: 1/1;
+}
+
+.sudoku-row {
+  flex: 1;
+  display: flex;
 }
 
 .sudoku-input {
+  width: 100%;
+  height: 100%;
   text-align: center;
+  font-size: 100%;
 }
+
 </style>
