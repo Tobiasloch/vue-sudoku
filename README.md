@@ -1,4 +1,6 @@
-# vue-sudoku-test
+# vue-sudoku
+
+This is a test project which i created to learn a bit of vue3. It contains a Sudoku component which simulates the game for playing it yourself.
 
 ## Project setup
 ```
