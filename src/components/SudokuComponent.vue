@@ -8,7 +8,7 @@
           block
           height="100%"
           :style="{
-            background: cell.valid ? 'inherit' : 'red',
+            background: cell.valid ? (cell.hint ? 'green' : 'inherit') : 'red',
             fontSize: `${buttonSize}px`
           }"
           :readonly="cell.isReadonly"
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineModel, Ref, ref, watch } from 'vue';
+import { computed, defineModel, Ref, ref, watch, defineExpose } from 'vue';
 import NumpadComponent from './NumpadComponent.vue';
 import Sudoku from '@/models/Sudoku';
 
@@ -45,6 +45,7 @@ class SudokuCell {
   colIndex: number
   overlay: boolean = false
   valid: boolean = true
+  hint: boolean = false
 
   initialValue: number
 
@@ -103,15 +104,39 @@ function setBoardValue(cell:SudokuCell, value:number) {
   if (isValid || reactiveModel.value.isValidMove(cell.rowIndex, cell.colIndex, value)) {
     cell.value = value
     if (!isValid) {
-      for (let row of cells.value) {
-        for (let cell of row) {
-          cell.valid = true
-        }
-      }
+      resetValid()
     }
   }
   cell.overlay = false
 }
+
+function showHint() {
+  const hint = reactiveModel.value.getHint()
+  console.log(hint)
+  if (hint) {
+    const [row, col, value] = hint
+    cells.value[row][col].hint = true
+    cells.value[row][col].value = value
+  }
+}
+
+function undo() {
+  reactiveModel.value.undo()
+  resetValid()
+}
+
+function resetValid() {
+  for (let row of cells.value) {
+    for (let cell of row) {
+      cell.valid = true
+    }
+  }
+}
+
+defineExpose({
+  undo, showHint
+})
+
 
 const sudokuContainer = ref<HTMLDivElement | null>(null)
 const buttonSize = computed(() => {

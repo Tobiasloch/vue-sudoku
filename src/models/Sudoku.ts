@@ -21,6 +21,12 @@ export default class Sudoku {
         }
     }
 
+    public copy(): Sudoku {
+        const sudoku = new Sudoku(this.board);
+        sudoku.lastActions = this.lastActions.map(action => [...action]);
+        return sudoku;
+    }
+
     public getRow(row: number): number[] {
         return this.board[row];
     }
@@ -93,6 +99,26 @@ export default class Sudoku {
         }
 
         return true;
+    }
+
+    public getHint():number[]|undefined {
+        for (let i = 0; i < this.board.length; i++) {
+            for (let j = 0; j < this.board[i].length; j++) {
+                if (this.board[i][j] === 0) {
+                    for (let num = 1; num <= 9; num++) {
+                        if (this.isValidMove(i, j, num)) {
+                            console.log(i, j, num)
+                            const newSudoku = this.copy();
+                            newSudoku.setCell(i, j, num);
+                            if (newSudoku.solve()) {
+                                return [i, j, num];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return undefined
     }
 
     public solve(): boolean {
