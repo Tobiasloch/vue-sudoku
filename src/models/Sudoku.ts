@@ -36,15 +36,15 @@ export default class Sudoku {
     }
 
     public setCell(row: number, col: number, value: number): void {
+        this.lastActions.push([row, col, this.board[row][col]]);
         this.board[row][col] = value;
-        this.lastActions.push([row, col, value]);
     }
 
     public undo(): void {
         const lastAction = this.lastActions.pop();
         if (lastAction) {
             const [row, col, value] = lastAction;
-            this.board[row][col] = 0;
+            this.board[row][col] = value;
         }
     }
 
