@@ -8,6 +8,9 @@
             block
             height="100%"
             @click="model = numbers[rowIndex][colIndex]"
+            :style="{
+              fontSize: `${props.fontsize}px`
+            }"
           >
             {{ numbers[rowIndex][colIndex] }}
           </v-btn>
@@ -16,12 +19,18 @@
     </div>
   </template>
 
-<script setup>
-import { ref, defineModel } from 'vue';
+<script setup lang="ts">
+import { ref, defineModel, defineProps } from 'vue';
+
+const props = defineProps({
+  fontsize: {
+    type: Number,
+    default: 25
+  }
+})
 
 const model = defineModel({
-    prop: 'modelValue',
-    event: 'update:modelValue'
+  type:Number
 })
 
 const numbers = ref([

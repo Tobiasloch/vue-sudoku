@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <v-card min-width="500px" min-height="500px">
+        <v-card width="min(80vh,100vw)">
             <v-card-title>
                 Sudoku
             </v-card-title>
@@ -9,18 +9,29 @@
             </v-card-text>
 
             <v-card-actions>
-                <v-btn
-                    icon
-                    @click="sudokuComponent.undo()"
-                >
-                    <v-icon>mdi-undo</v-icon>
-                </v-btn>
-                <v-btn
-                    icon
-                    @click="sudokuComponent.showHint()"
-                >
-                    <v-icon>mdi-lightbulb</v-icon>
-                </v-btn>
+                <v-spacer></v-spacer>
+                <v-tooltip text="Undo" location="top">
+                    <template v-slot:activator="{ props }">
+                        <v-btn
+                            icon
+                            @click="sudokuComponent.undo()"
+                            v-bind="props"
+                        >
+                            <v-icon>mdi-undo</v-icon>
+                        </v-btn>
+                    </template>
+                </v-tooltip>
+                <v-tooltip text="Hint" location="top">
+                    <template v-slot:activator="{ props }">
+                        <v-btn
+                            icon
+                            @click="sudokuComponent.showHint()"
+                            v-bind="props"
+                        >
+                            <v-icon>mdi-lightbulb</v-icon>
+                        </v-btn>
+                    </template>
+                </v-tooltip>
             </v-card-actions>
         </v-card>
     </div>
@@ -67,6 +78,5 @@ initialState
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 </style>

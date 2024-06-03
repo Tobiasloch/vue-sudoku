@@ -25,6 +25,7 @@
           >
             <NumpadComponent 
               @update:modelValue="(newValue:number) => {setBoardValue(cell, newValue)}"
+              :fontsize="buttonSize"
             >
             </NumpadComponent>
           </v-overlay>
@@ -100,19 +101,22 @@ watch(() => model,
 )
 
 function setBoardValue(cell:SudokuCell, value:number) {
+  cell.overlay = false
+  if (cell.value == value) {
+    return
+  }
+
   const isValid = reactiveModel.value.isValid()
   if (isValid || reactiveModel.value.isValidMove(cell.rowIndex, cell.colIndex, value)) {
     cell.value = value
     if (!isValid) {
-      resetValid()
+      resetCells()
     }
   }
-  cell.overlay = false
 }
 
 function showHint() {
   const hint = reactiveModel.value.getHint()
-  console.log(hint)
   if (hint) {
     const [row, col, value] = hint
     cells.value[row][col].hint = true
@@ -122,13 +126,14 @@ function showHint() {
 
 function undo() {
   reactiveModel.value.undo()
-  resetValid()
+  resetCells()
 }
 
-function resetValid() {
+function resetCells() {
   for (let row of cells.value) {
     for (let cell of row) {
       cell.valid = true
+      cell.hint = false
     }
   }
 }
