@@ -1,26 +1,27 @@
 <template>
   <div ref="sudokuContainer" class="sudoku-container">
-    <div v-for="(row, rowIndex) in board" :key="rowIndex" class="sudoku-row">
-      <div v-for="(number, colIndex) in row" :key="colIndex" class="sudoku-cell">
+    <div v-for="(row, rowIndex) in cells" :key="rowIndex" class="sudoku-row">
+      <div v-for="(cell, colIndex) in row" :key="`${rowIndex}:${colIndex}`" class="sudoku-cell">
         <v-btn 
           class="sudoku-input" 
           variant="text"
           block
           height="100%"
+          :style="{background: cell.valid ? 'inherit' : 'red'}"
+          :readonly="cell.isReadonly"
         >
-          <div v-if="number != 0">
-            {{ number }}
+          <div v-if="cell.value != 0">
+            {{ cell.value }}
           </div>
           <v-overlay
-            v-model="overlayArray[rowIndex][colIndex]"
+            v-model="cell.overlay"
             activator="parent"
             location-strategy="connected"
             location="center"
             min-width="300%"
           >
             <NumpadComponent 
-              v-model="model.board[rowIndex][colIndex]"
-              @update:modelValue="(newValue) => {overlayArray[rowIndex][colIndex] = false; setBoardValue(rowIndex, colIndex, newValue)}"
+              @update:modelValue="(newValue:number) => {setBoardValue(cell, newValue)}"
             >
             </NumpadComponent>
           </v-overlay>
@@ -31,78 +32,84 @@
 </template>
 
 <script setup lang="ts">
-import { defineModel, ref, computed } from 'vue';
+import { defineModel, Ref, ref, watch } from 'vue';
 import NumpadComponent from './NumpadComponent.vue';
 import Sudoku from '@/models/Sudoku';
 
-// class SudokuCell {
-//   overlay = false
-//   x = 0
-//   y = 0
+class SudokuCell {
+  sudoku:Sudoku
+  rowIndex: number
+  colIndex: number
+  overlay: boolean = false
+  valid: boolean = true
 
-//   set value(value) {
-//     this.value = value
-//     model.value[this.x][this.y] = value
-//   }
-//   get value() {
-//     return model.value[this.x][this.y]
-//   }
+  initialValue: number
 
-//   constructor(value, x, y) {
-//     this.value = value
-//     this.x = x
-//     this.y = y
-//   }
-// }
-
-
-// Initialize a sample Sudoku puzzle (0 represents empty cells)
-
-const model = defineModel({
-  type: Sudoku,
-  required: true,
-  default: undefined,
-  set(value) {
-    return value
+  constructor(sudoku:Sudoku, rowIndex:number, colIndex:number) {
+    this.sudoku = sudoku
+    this.rowIndex = rowIndex
+    this.colIndex = colIndex
+    this.initialValue = this.value
   }
-})
 
-const overlayArray = ref(model.value.board.map((row) => {
-    return row.map(() => {
-      return false
-    })
-  })
-)
+  get isReadonly() {
+    return this.initialValue != 0
+  }
 
-const board = computed(() => {
-  return [...model.value.board]
-})
+  get value() {
+    return this.sudoku.board[this.rowIndex][this.colIndex]
+  }
+  set value(value) {
+    this.valid = this.sudoku.isValidMove(this.rowIndex, this.colIndex, value)
+    this.sudoku.board[this.rowIndex][this.colIndex] = value
+  }
 
-// let initialBoard = [
-//   [5, 3, 0, 0, 7, 0, 0, 0, 0],
-//   [6, 0, 0, 1, 9, 5, 0, 0, 0],
-//   [0, 9, 8, 0, 0, 0, 0, 6, 0],
-//   [8, 0, 0, 0, 6, 0, 0, 0, 3],
-//   [4, 0, 0, 8, 0, 3, 0, 0, 1],
-//   [7, 0, 0, 0, 2, 0, 0, 0, 6],
-//   [0, 6, 0, 0, 0, 0, 2, 8, 0],
-//   [0, 0, 0, 4, 1, 9, 0, 0, 5],
-//   [0, 0, 0, 0, 8, 0, 0, 7, 9]
-// ]
-
-function setBoardValue(rowIndex, colIndex, value) {
-  console.log(value)
-  
-  // model.value.board[rowIndex][colIndex] = value
-  console.log(model.value.board)
+  update(newValue:number) {
+    if (!this.sudoku.isValidMove(this.rowIndex, this.colIndex, newValue)) {
+      this.valid = false
+    } else {
+      this.valid = true
+    }
+    this.value = newValue
+    this.overlay = false
+  }
 }
 
+const model = defineModel<Sudoku>({
+  default: new Sudoku(),
+  type: Sudoku,
+})
 
-// const cells = ref(sudokuGrid.value.map((row, rowIndex) => {
-//   return row.map((value, colIndex) => {
-//     return new SudokuCell(value, rowIndex, colIndex)
-//   })
-// }))
+const reactiveModel = ref(model)
+
+let cells:Ref<SudokuCell[][]> = ref([])
+
+watch(() => model,
+  () => {
+    cells.value = reactiveModel.value.board.map((row, rowIndex) => {
+      return row.map((num, colIndex) => {
+        return new SudokuCell(reactiveModel.value, rowIndex, colIndex)
+      })
+    })
+  },
+  { immediate: true }
+)
+
+function setBoardValue(cell:SudokuCell, value:number) {
+  const isValid = reactiveModel.value.isValid()
+  if (isValid || reactiveModel.value.isValidMove(cell.rowIndex, cell.colIndex, value)) {
+    cell.value = value
+    if (!isValid) {
+      for (let row of cells.value) {
+        for (let cell of row) {
+          cell.valid = true
+        }
+      }
+    }
+  }
+  cell.overlay = false
+}
+
 </script>
 
 <style scoped>

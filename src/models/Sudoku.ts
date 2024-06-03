@@ -1,8 +1,23 @@
-export default class Sudoku {
-    board: number[][];
+const emptyBoard = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+];
 
-    constructor(board: number[][]) {
-        this.board = board;
+export default class Sudoku {
+    private board: number[][];
+
+    constructor(board: number[][] = emptyBoard) {
+        this.board = board.map(row => [...row]);
+        if (!this.isValid()) {
+            throw new Error('Invalid board');
+        }
     }
 
     public getRow(row: number): number[] {
@@ -25,6 +40,25 @@ export default class Sudoku {
         }
 
         return box;
+    }
+
+    public isValid(): boolean {
+        for (let i = 0; i < this.board.length; i++) {
+            for (let j = 0; j < this.board[i].length; j++) {
+                const num = this.board[i][j];
+                if (num === 0) continue;
+                
+                this.board[i][j] = 0;
+                const isValidMove = this.isValidMove(i, j, num)
+                this.board[i][j] = num;
+
+                if (!isValidMove) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public isValidMove(row: number, col: number, num: number): boolean {
