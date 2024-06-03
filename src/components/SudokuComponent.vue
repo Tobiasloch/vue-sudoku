@@ -7,7 +7,10 @@
           variant="text"
           block
           height="100%"
-          :style="{background: cell.valid ? 'inherit' : 'red'}"
+          :style="{
+            background: cell.valid ? 'inherit' : 'red',
+            fontSize: `${buttonSize}px`
+          }"
           :readonly="cell.isReadonly"
         >
           <div v-if="cell.value != 0">
@@ -32,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineModel, Ref, ref, watch } from 'vue';
+import { computed, defineModel, Ref, ref, watch } from 'vue';
 import NumpadComponent from './NumpadComponent.vue';
 import Sudoku from '@/models/Sudoku';
 
@@ -61,7 +64,7 @@ class SudokuCell {
   }
   set value(value) {
     this.valid = this.sudoku.isValidMove(this.rowIndex, this.colIndex, value)
-    this.sudoku.board[this.rowIndex][this.colIndex] = value
+    this.sudoku.setCell(this.rowIndex, this.colIndex, value)
   }
 
   update(newValue:number) {
@@ -110,6 +113,14 @@ function setBoardValue(cell:SudokuCell, value:number) {
   cell.overlay = false
 }
 
+const sudokuContainer = ref<HTMLDivElement | null>(null)
+const buttonSize = computed(() => {
+  if (sudokuContainer.value) {
+    return sudokuContainer.value.clientWidth / 27
+  }
+  return 12
+})
+
 </script>
 
 <style scoped>
@@ -151,7 +162,6 @@ function setBoardValue(cell:SudokuCell, value:number) {
   width: 100%;
   height: 100%;
   text-align: center;
-  font-size: 4vh;
 }
 
 </style>

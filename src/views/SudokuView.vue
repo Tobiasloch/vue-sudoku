@@ -1,14 +1,29 @@
 <template>
     <div class="container">
-        <SudokuComponent v-model="sudoku" />
+        <v-card min-width="500px" min-height="500px">
+            <v-card-title>
+                Sudoku
+            </v-card-title>
+            <v-card-text>
+                <SudokuComponent v-model="sudoku" />
+            </v-card-text>
+
+            <v-card-actions>
+                <v-btn
+                    icon
+                    @click="sudoku.undo()"
+                ><v-icon>mdi-undo</v-icon></v-btn>
+            </v-card-actions>
+        </v-card>
     </div>
 </template>
 
 <script setup>
 import Sudoku from '@/models/Sudoku';
 import SudokuComponent from '../components/SudokuComponent.vue';
+import { ref } from 'vue';
 
-const sudoku = new Sudoku([
+const sudoku = ref(new Sudoku([
   [0, 3, 0, 0, 0, 0, 0, 0, 0],
   [6, 0, 0, 1, 9, 5, 0, 0, 0],
   [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -18,7 +33,7 @@ const sudoku = new Sudoku([
   [0, 6, 0, 0, 0, 0, 2, 8, 0],
   [0, 0, 0, 4, 1, 9, 0, 0, 5],
   [0, 0, 0, 0, 8, 0, 0, 7, 9]
-])
+]))
 
 </script>
 
@@ -27,6 +42,6 @@ const sudoku = new Sudoku([
     display: flex;
     justify-content: center;
     align-items: center;
-    height: min(80vh);
+    height: 100vh;
 }
 </style>

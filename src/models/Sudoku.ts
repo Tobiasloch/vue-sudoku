@@ -11,7 +11,8 @@ const emptyBoard = [
 ];
 
 export default class Sudoku {
-    private board: number[][];
+    public board: number[][];
+    private lastActions: number[][] = [];
 
     constructor(board: number[][] = emptyBoard) {
         this.board = board.map(row => [...row]);
@@ -26,6 +27,19 @@ export default class Sudoku {
 
     public getColumn(col: number): number[] {
         return this.board.map(row => row[col]);
+    }
+
+    public setCell(row: number, col: number, value: number): void {
+        this.board[row][col] = value;
+        this.lastActions.push([row, col, value]);
+    }
+
+    public undo(): void {
+        const lastAction = this.lastActions.pop();
+        if (lastAction) {
+            const [row, col, value] = lastAction;
+            this.board[row][col] = 0;
+        }
     }
 
     public getBox(row: number, col: number): number[] {
@@ -87,13 +101,13 @@ export default class Sudoku {
                 if (this.board[i][j] === 0) {
                     for (let num = 1; num <= 9; num++) {
                         if (this.isValidMove(i, j, num)) {
-                            this.board[i][j] = num;
+                            this.setCell(i, j, num);
 
                             if (this.solve()) {
                                 return true;
                             }
 
-                            this.board[i][j] = 0;
+                            this.undo();
                         }
                     }
 
