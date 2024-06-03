@@ -1,6 +1,6 @@
 <template>
   <div ref="sudokuContainer" class="sudoku-container">
-    <div v-for="(row, rowIndex) in model.value.board" :key="rowIndex" class="sudoku-row">
+    <div v-for="(row, rowIndex) in board" :key="rowIndex" class="sudoku-row">
       <div v-for="(number, colIndex) in row" :key="colIndex" class="sudoku-cell">
         <v-btn 
           class="sudoku-input" 
@@ -8,7 +8,7 @@
           block
           height="100%"
         >
-          <div v-if="cell.value != 0">
+          <div v-if="number != 0">
             {{ number }}
           </div>
           <v-overlay
@@ -19,8 +19,8 @@
             min-width="300%"
           >
             <NumpadComponent 
-              v-model="model.value.board[rowIndex][colIndex]"
-              @update:modelValue="overlayArray[rowIndex][colIndex] = false"
+              v-model="model.board[rowIndex][colIndex]"
+              @update:modelValue="(newValue) => {overlayArray[rowIndex][colIndex] = false; setBoardValue(rowIndex, colIndex, newValue)}"
             >
             </NumpadComponent>
           </v-overlay>
@@ -30,10 +30,10 @@
   </div>
 </template>
 
-<script setup>
-import { defineModel, computed } from 'vue';
+<script setup lang="ts">
+import { defineModel, ref, computed } from 'vue';
 import NumpadComponent from './NumpadComponent.vue';
-import Sudoku from '../models/Sudoku.ts';
+import Sudoku from '@/models/Sudoku';
 
 // class SudokuCell {
 //   overlay = false
@@ -61,26 +61,41 @@ import Sudoku from '../models/Sudoku.ts';
 const model = defineModel({
   type: Sudoku,
   required: true,
-  default: new Sudoku([
-  [5, 3, 0, 0, 7, 0, 0, 0, 0],
-  [6, 0, 0, 1, 9, 5, 0, 0, 0],
-  [0, 9, 8, 0, 0, 0, 0, 6, 0],
-  [8, 0, 0, 0, 6, 0, 0, 0, 3],
-  [4, 0, 0, 8, 0, 3, 0, 0, 1],
-  [7, 0, 0, 0, 2, 0, 0, 0, 6],
-  [0, 6, 0, 0, 0, 0, 2, 8, 0],
-  [0, 0, 0, 4, 1, 9, 0, 0, 5],
-  [0, 0, 0, 0, 8, 0, 0, 7, 9]
-])
+  default: undefined,
+  set(value) {
+    return value
+  }
 })
 
-const overlayArray = computed(() => {
-  return model.value.board.map((row) => {
+const overlayArray = ref(model.value.board.map((row) => {
     return row.map(() => {
       return false
     })
   })
+)
+
+const board = computed(() => {
+  return [...model.value.board]
 })
+
+// let initialBoard = [
+//   [5, 3, 0, 0, 7, 0, 0, 0, 0],
+//   [6, 0, 0, 1, 9, 5, 0, 0, 0],
+//   [0, 9, 8, 0, 0, 0, 0, 6, 0],
+//   [8, 0, 0, 0, 6, 0, 0, 0, 3],
+//   [4, 0, 0, 8, 0, 3, 0, 0, 1],
+//   [7, 0, 0, 0, 2, 0, 0, 0, 6],
+//   [0, 6, 0, 0, 0, 0, 2, 8, 0],
+//   [0, 0, 0, 4, 1, 9, 0, 0, 5],
+//   [0, 0, 0, 0, 8, 0, 0, 7, 9]
+// ]
+
+function setBoardValue(rowIndex, colIndex, value) {
+  console.log(value)
+  
+  // model.value.board[rowIndex][colIndex] = value
+  console.log(model.value.board)
+}
 
 
 // const cells = ref(sudokuGrid.value.map((row, rowIndex) => {

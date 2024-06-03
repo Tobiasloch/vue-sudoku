@@ -1,4 +1,4 @@
-class Sudoku {
+export default class Sudoku {
     board: number[][];
 
     constructor(board: number[][]) {
