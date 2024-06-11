@@ -10,9 +10,14 @@ const emptyBoard = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
+// add type for generate modes
+export type GenerateMode = 'easy' | 'medium' | 'hard';
+
 export default class Sudoku {
     public board: number[][];
     private lastActions: number[][] = [];
+
+
 
     constructor(board: number[][] = emptyBoard) {
         this.board = board.map(row => [...row]);
@@ -63,8 +68,18 @@ export default class Sudoku {
     }
 
     public isValid(): boolean {
+        if (this.board.length !== 9) {
+            return false;
+        }
         for (let i = 0; i < this.board.length; i++) {
+            if (this.board[i].length !== 9) {
+                return false;
+            }
             for (let j = 0; j < this.board[i].length; j++) {
+                if (this.board[i][j] < 0 || this.board[i][j] > 9) {
+                    return false;
+                }
+
                 const num = this.board[i][j];
                 if (num === 0) continue;
                 
@@ -143,5 +158,9 @@ export default class Sudoku {
         }
 
         return this.isSolved();
+    }
+
+    generate(mode: GenerateMode = 'easy') {
+        throw new Error('Not implemented');
     }
 }
