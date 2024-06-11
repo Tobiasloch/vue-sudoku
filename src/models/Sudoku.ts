@@ -1,3 +1,5 @@
+import { shuffle } from "./utils";
+
 const emptyBoard = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -10,8 +12,15 @@ const emptyBoard = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
-// add type for generate modes
-export type GenerateMode = 'easy' | 'medium' | 'hard';
+export function sudokuCellIndices() : number[][] {
+    const cellIndices = [];
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 9; j++) {
+            cellIndices.push([i, j]);
+        }
+    }
+    return cellIndices;
+}
 
 export default class Sudoku {
     public board: number[][];
@@ -164,7 +173,7 @@ export default class Sudoku {
         possibleMoves.sort((a, b) => a[1].length - b[1].length);
 
         for (const [[i,j], moves] of possibleMoves) {
-            if (randomise) moves.sort(() => Math.random() - 0.5);
+            if (randomise) shuffle(moves);
             
             for (const num of moves) {
                 this.setCell(i, j, num);
@@ -182,7 +191,17 @@ export default class Sudoku {
         return this.isSolved();
     }
 
-    generate(mode: GenerateMode = 'easy') {
-        throw new Error('Not implemented');
+    public generate(emptyCells:number = 6) {
+        this.board = emptyBoard.map(row => [...row]);
+
+        this.solve(true);
+
+        const cellIndices = sudokuCellIndices();
+        shuffle(cellIndices);
+
+        for (let i = 0; i < emptyCells; i++) {
+            const [row, col] = cellIndices[i];
+            this.board[row][col] = 0;
+        }
     }
 }

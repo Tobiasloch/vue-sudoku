@@ -13,7 +13,7 @@
                     <template v-slot:activator="{ props }">
                         <v-btn
                             icon
-                            @click="generate()"
+                            @click="sudokuGeneratorDialog = true"
                             v-bind="props"
                         >
                             <v-icon>mdi-shuffle</v-icon>
@@ -93,8 +93,57 @@
                                 No
                             </v-btn>
 
-                            <v-btn @click="areYouSureDialog = false; areYouSureAction()">
+                            <v-btn color="primary" @click="areYouSureDialog = false; areYouSureAction()">
                                 Yes
+                            </v-btn>
+                        </template>
+                    </v-card>
+                </v-dialog>
+
+                <v-dialog
+                    v-model="sudokuGeneratorDialog"
+                    max-width="600"
+                >
+                    <v-card
+                        prepend-icon="mdi-shuffle"
+                        title="Generate new sudoku?"
+                    >
+                        <v-card-text>
+                            Select the difficulty of the sudoku to generate. The higher the number, the more fields will be filled in for you. 
+
+                            <v-radio-group inline v-model="sudokuDifficulty">
+                                <v-radio label="Easy" :value="easyDifficulty"></v-radio>
+                                <v-radio label="Medium" :value="mediumDifficulty"></v-radio>
+                                <v-radio label="Hard" :value="hardDifficulty"></v-radio>
+                            </v-radio-group>
+
+                            <v-slider
+                                v-model="sudokuDifficulty"
+                                :max="9*9"
+                                :min="1"
+                                class="align-center"
+                                hide-details
+                            >
+                                <template v-slot:append>
+                                <v-text-field
+                                    v-model="sudokuDifficulty"
+                                    style="width: 70px"
+                                    type="number"
+                                    hide-details
+                                    single-line
+                                ></v-text-field>
+                                </template>
+                            </v-slider>
+                        </v-card-text>
+                        <template v-slot:actions>
+                            <v-spacer></v-spacer>
+
+                            <v-btn @click="sudokuGeneratorDialog = false">
+                                Cancel
+                            </v-btn>
+
+                            <v-btn color="primary" @click="sudokuGeneratorDialog = false; generate()">
+                                Generate
                             </v-btn>
                         </template>
                     </v-card>
@@ -174,8 +223,17 @@ let areYouSureTitle = ref('');
 let areYouSureIcon = ref('');
 let areYouSureAction = ref(() => {});
 
+const easyDifficulty = ref(43);
+const mediumDifficulty = ref(46);
+const hardDifficulty = ref(49);
+let sudokuGeneratorDialog = ref(false);
+let sudokuDifficulty = ref(easyDifficulty.value);
+
 function generate() {
-    throw new Error('Not implemented');
+    generatedSudoku = new Sudoku();
+    generatedSudoku.generate(sudokuDifficulty.value);
+    
+    sudoku.value = generatedSudoku.copy();
 }
 
 </script>
