@@ -123,6 +123,26 @@ export default class Sudoku {
         return emptyCells;
     }
 
+    public possibleMoves(): number[][][] {
+        const possibleMoves = [];
+        const emptyCells = this.emptyCells();
+
+        for (const [i, j] of emptyCells) {
+            if (this.board[i][j] === 0) {
+                const moves = [];
+                for (let num = 1; num <= 9; num++) {
+                    if (this.isValidMove(i, j, num)) {
+                        moves.push(num);
+                    }
+                }
+                possibleMoves.push([[i, j], moves]);
+            } else {
+                possibleMoves.push([[i,j],[this.board[i][j]]]);
+            }
+        }   
+        return possibleMoves;
+    }
+
 
     public getHint():number[]|undefined {
         if (!this.isValid()) return undefined
@@ -140,19 +160,18 @@ export default class Sudoku {
     }
 
     public solve(): boolean {
-        const emptyCells = this.emptyCells();
+        const possibleMoves = this.possibleMoves();
+        possibleMoves.sort((a, b) => a[1].length - b[1].length);
 
-        for (const [i, j] of emptyCells) {
-            for (let num = 1; num <= 9; num++) {
-                if (this.isValidMove(i, j, num)) {
-                    this.setCell(i, j, num);
-
-                    if (this.solve()) {
-                        return true;
-                    }
-
-                    this.undo();
+        for (const [[i,j], moves] of possibleMoves) {
+            for (const num of moves) {
+                this.setCell(i, j, num);
+    
+                if (this.solve()) {
+                    return true;
                 }
+    
+                this.undo();
             }
 
             return false;
