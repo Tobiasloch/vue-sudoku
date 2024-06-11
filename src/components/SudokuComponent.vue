@@ -89,7 +89,7 @@ const reactiveModel = ref(model)
 
 let cells:Ref<SudokuCell[][]> = ref([])
 
-watch(() => model,
+watch(() => reactiveModel.value,
   () => {
     cells.value = reactiveModel.value.board.map((row, rowIndex) => {
       return row.map((num, colIndex) => {
@@ -116,6 +116,7 @@ function setBoardValue(cell:SudokuCell, value:number) {
 }
 
 function showHint() {
+  resetCells();
   const hint = reactiveModel.value.getHint()
   if (hint) {
     const [row, col, value] = hint
@@ -129,6 +130,11 @@ function undo() {
   resetCells()
 }
 
+function solve() {
+  reactiveModel.value.solve()
+  resetCells()
+}
+
 function resetCells() {
   for (let row of cells.value) {
     for (let cell of row) {
@@ -139,7 +145,7 @@ function resetCells() {
 }
 
 defineExpose({
-  undo, showHint
+  undo, showHint, solve
 })
 
 
