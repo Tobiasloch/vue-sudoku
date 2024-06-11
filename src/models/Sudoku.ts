@@ -159,11 +159,13 @@ export default class Sudoku {
         return undefined
     }
 
-    public solve(): boolean {
+    public solve(randomise: boolean=false): boolean {
         const possibleMoves = this.possibleMoves();
         possibleMoves.sort((a, b) => a[1].length - b[1].length);
 
         for (const [[i,j], moves] of possibleMoves) {
+            if (randomise) moves.sort(() => Math.random() - 0.5);
+            
             for (const num of moves) {
                 this.setCell(i, j, num);
     
