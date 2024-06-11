@@ -27,17 +27,11 @@ export default class Sudoku {
     }
 
     public copy(): Sudoku {
-        const sudoku = new Sudoku(this.board);
+        // cooy should not throw an error when invalid board
+        const sudoku = new Sudoku();
+        sudoku.board = this.board.map(row => [...row]);
         sudoku.lastActions = this.lastActions.map(action => [...action]);
         return sudoku;
-    }
-
-    public getRow(row: number): number[] {
-        return this.board[row];
-    }
-
-    public getColumn(col: number): number[] {
-        return this.board.map(row => row[col]);
     }
 
     public setCell(row: number, col: number, value: number): void {
@@ -51,6 +45,14 @@ export default class Sudoku {
             const [row, col, value] = lastAction;
             this.board[row][col] = value;
         }
+    }
+
+    public getRow(row: number): number[] {
+        return this.board[row];
+    }
+
+    public getColumn(col: number): number[] {
+        return this.board.map(row => row[col]);
     }
 
     public getBox(row: number, col: number): number[] {
@@ -105,56 +107,55 @@ export default class Sudoku {
     }
 
     public isSolved(): boolean {
-        for (let i = 0; i < this.board.length; i++) {
-            for (let j = 0; j < this.board[i].length; j++) {
-                if (this.board[i][j] === 0) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return this.emptyCells().length === 0;
     }
 
-    public getHint():number[]|undefined {
+    public emptyCells(): number[][] {
+        const emptyCells = [];
         for (let i = 0; i < this.board.length; i++) {
             for (let j = 0; j < this.board[i].length; j++) {
                 if (this.board[i][j] === 0) {
-                    for (let num = 1; num <= 9; num++) {
-                        if (this.isValidMove(i, j, num)) {
-                            console.log(i, j, num)
-                            const newSudoku = this.copy();
-                            newSudoku.setCell(i, j, num);
-                            if (newSudoku.solve()) {
-                                return [i, j, num];
-                            }
-                        }
-                    }
+                    emptyCells.push([i, j]);
                 }
             }
         }
+
+        return emptyCells;
+    }
+
+
+    public getHint():number[]|undefined {
+        if (!this.isValid()) return undefined
+        
+        const emptyCells = this.emptyCells();
+        if (emptyCells.length === 0) return undefined
+
+        const [i, j] = emptyCells[0]
+        const newSudoku = this.copy();
+        if (newSudoku.solve()) {
+            return [i, j, newSudoku.board[i][j]]
+        }
+
         return undefined
     }
 
     public solve(): boolean {
-        for (let i = 0; i < this.board.length; i++) {
-            for (let j = 0; j < this.board[i].length; j++) {
-                if (this.board[i][j] === 0) {
-                    for (let num = 1; num <= 9; num++) {
-                        if (this.isValidMove(i, j, num)) {
-                            this.setCell(i, j, num);
+        const emptyCells = this.emptyCells();
 
-                            if (this.solve()) {
-                                return true;
-                            }
+        for (const [i, j] of emptyCells) {
+            for (let num = 1; num <= 9; num++) {
+                if (this.isValidMove(i, j, num)) {
+                    this.setCell(i, j, num);
 
-                            this.undo();
-                        }
+                    if (this.solve()) {
+                        return true;
                     }
 
-                    return false;
+                    this.undo();
                 }
             }
+
+            return false;
         }
 
         return this.isSolved();

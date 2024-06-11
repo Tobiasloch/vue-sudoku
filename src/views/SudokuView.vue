@@ -35,7 +35,7 @@
                     <template v-slot:activator="{ props }">
                         <v-btn
                             icon
-                            @click="(sudoku.isValid()) ? sudokuComponent.showHint() : null"
+                            @click="sudokuComponent.showHint()"
                             v-bind="props"
                         >
                             <v-icon>mdi-lightbulb</v-icon>

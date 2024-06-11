@@ -116,9 +116,9 @@ function setBoardValue(cell:SudokuCell, value:number) {
 }
 
 function showHint() {
-  resetCells();
   const hint = reactiveModel.value.getHint()
   if (hint) {
+    resetCells();
     const [row, col, value] = hint
     cells.value[row][col].hint = true
     cells.value[row][col].value = value
