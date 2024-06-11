@@ -168,6 +168,28 @@ export default class Sudoku {
         return undefined
     }
 
+    public hasUniqueSolution(): boolean {
+        const newSudoku = this.copy();
+        const possibleMoves = newSudoku.possibleMoves();
+
+        let solutionFound = false;
+        for (const [[i,j], moves] of possibleMoves) {
+            let solutions = 0;
+            for (const num of moves) {
+                newSudoku.setCell(i, j, num);
+                if (newSudoku.solve()) {
+                    solutions++;
+                    solutionFound = true;
+
+                    if (solutions > 1) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return solutionFound
+    }
+
     public solve(randomise: boolean=false): boolean {
         const possibleMoves = this.possibleMoves();
         possibleMoves.sort((a, b) => a[1].length - b[1].length);
@@ -178,7 +200,7 @@ export default class Sudoku {
             for (const num of moves) {
                 this.setCell(i, j, num);
     
-                if (this.solve()) {
+                if (this.solve(randomise)) {
                     return true;
                 }
     
@@ -199,9 +221,21 @@ export default class Sudoku {
         const cellIndices = sudokuCellIndices();
         shuffle(cellIndices);
 
-        for (let i = 0; i < emptyCells; i++) {
-            const [row, col] = cellIndices[i];
-            this.board[row][col] = 0;
+        let j = 0;
+        for (let i = 0; i < emptyCells && j < cellIndices.length; i++) {
+            let hasUniqueSolution = false;
+
+            for (; j < cellIndices.length; j++) {
+                const cell = cellIndices[j];
+                const [row, col] = cell;
+
+                const value = this.board[row][col];
+                this.board[row][col] = 0;
+                hasUniqueSolution = this.hasUniqueSolution();
+                if (!hasUniqueSolution) {
+                    this.board[row][col] = value;
+                }
+            }
         }
     }
 }
