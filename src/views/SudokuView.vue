@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <v-card width="min(80vh,100vw)">
+        <v-card width="min(85vh,100vw)">
             <v-card-title>
                 Sudoku
             </v-card-title>
@@ -8,8 +8,7 @@
                 <SudokuComponent ref="sudokuComponent" v-model="sudoku" />
             </v-card-text>
 
-            <v-card-actions>
-                <v-spacer></v-spacer>
+            <v-card-actions class="card-actions">
                 <v-tooltip text="Undo" location="top">
                     <template v-slot:activator="{ props }">
                         <v-btn
@@ -78,5 +77,11 @@ initialState
     display: flex;
     justify-content: center;
     align-items: center;
+    min-width: 500px;
+    height: 100vh;
+}
+
+.card-actions {
+    justify-content: center;
 }
 </style>
