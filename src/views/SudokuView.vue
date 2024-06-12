@@ -11,33 +11,21 @@
             <v-card-actions class="card-actions">
                 <v-tooltip text="Generate" location="top">
                     <template v-slot:activator="{ props }">
-                        <v-btn
-                            icon
-                            @click="sudokuGeneratorDialog = true"
-                            v-bind="props"
-                        >
+                        <v-btn icon @click="sudokuGeneratorDialog = true" v-bind="props">
                             <v-icon>mdi-shuffle</v-icon>
                         </v-btn>
                     </template>
                 </v-tooltip>
                 <v-tooltip text="Undo" location="top">
                     <template v-slot:activator="{ props }">
-                        <v-btn
-                            icon
-                            @click="sudokuComponent.undo()"
-                            v-bind="props"
-                        >
+                        <v-btn icon @click="sudokuComponent.undo()" v-bind="props">
                             <v-icon>mdi-undo</v-icon>
                         </v-btn>
                     </template>
                 </v-tooltip>
                 <v-tooltip text="Hint" location="top">
                     <template v-slot:activator="{ props }">
-                        <v-btn
-                            icon
-                            @click="sudokuComponent.showHint()"
-                            v-bind="props"
-                        >
+                        <v-btn icon @click="sudokuComponent.showHint()" v-bind="props">
                             <v-icon>mdi-lightbulb</v-icon>
                         </v-btn>
                     </template>
@@ -45,47 +33,28 @@
 
                 <v-tooltip text="Solve" location="top">
                     <template v-slot:activator="{ props }">
-                        <v-btn
-                            icon
-                            @click="initSolveQuestion()"
-                            v-bind="props"
-                        >
+                        <v-btn icon @click="initSolveQuestion()" v-bind="props">
                             <v-icon>mdi-check</v-icon>
                         </v-btn>
                     </template>
                 </v-tooltip>
                 <v-tooltip text="Clear" location="top">
                     <template v-slot:activator="{ props }">
-                        <v-btn
-                            icon
-                            @click="initClearQuestion()"
-                            v-bind="props"
-                        >
+                        <v-btn icon @click="initClearQuestion()" v-bind="props">
                             <v-icon>mdi-delete</v-icon>
                         </v-btn>
                     </template>
                 </v-tooltip>
                 <v-tooltip text="Reset" location="top">
                     <template v-slot:activator="{ props }">
-                        <v-btn
-                            icon
-                            @click="initResetQuestion()"
-                            v-bind="props"
-                        >
+                        <v-btn icon @click="initResetQuestion()" v-bind="props">
                             <v-icon>mdi-reload</v-icon>
                         </v-btn>
                     </template>
                 </v-tooltip>
 
-                <v-dialog
-                    v-model="areYouSureDialog"
-                    max-width="400"
-                >
-                    <v-card
-                        :prepend-icon="areYouSureIcon"
-                        :text="areYouSureText"
-                        :title="areYouSureTitle"
-                    >
+                <v-dialog v-model="areYouSureDialog" max-width="400">
+                    <v-card :prepend-icon="areYouSureIcon" :text="areYouSureText" :title="areYouSureTitle">
                         <template v-slot:actions>
                             <v-spacer></v-spacer>
 
@@ -100,38 +69,40 @@
                     </v-card>
                 </v-dialog>
 
-                <v-dialog
-                    v-model="sudokuGeneratorDialog"
-                    max-width="600"
-                >
-                    <v-card
-                        prepend-icon="mdi-shuffle"
-                        title="Generate new sudoku?"
-                    >
+                <v-dialog v-model="sudokuGeneratorDialog" max-width="600">
+                    <v-card prepend-icon="mdi-shuffle" title="Generate new sudoku?">
                         <v-card-text>
-                            Select the difficulty of the sudoku to generate. The higher the number, the more fields will be filled in for you. 
+                            Select the difficulty of the sudoku to generate. The higher the number, the more fields will
+                            be filled in
+                            for you.
 
-                            <v-radio-group inline v-model="sudokuDifficulty">
-                                <v-radio label="Easy" :value="easyDifficulty"></v-radio>
-                                <v-radio label="Medium" :value="mediumDifficulty"></v-radio>
-                                <v-radio label="Hard" :value="hardDifficulty"></v-radio>
+                            <v-radio-group inline v-model="selectedOption" center-affix @update:model-value="sudokuDifficulty = selectedOption">
+                                <v-radio 
+                                    v-for="option in difficultyOptions" 
+                                    :key="option.value" 
+                                    :label="option.label"
+                                    :value="option.value"
+                                ></v-radio>
                             </v-radio-group>
 
-                            <v-slider
-                                v-model="sudokuDifficulty"
-                                :max="9*9"
+                            <v-slider 
+                                @update:model-value="updatedDifficulty" 
+                                v-model="sudokuDifficulty" 
+                                :max="81" 
                                 :min="1"
+                                :step="1" 
                                 class="align-center"
                                 hide-details
                             >
                                 <template v-slot:append>
-                                <v-text-field
-                                    v-model="sudokuDifficulty"
-                                    style="width: 70px"
-                                    type="number"
-                                    hide-details
-                                    single-line
-                                ></v-text-field>
+                                    <v-text-field 
+                                        @update:model-value="updatedDifficulty" 
+                                        v-model="sudokuDifficulty" 
+                                        type="number" 
+                                        hide-details 
+                                        single-line
+                                        width="80px"
+                                    ></v-text-field>
                                 </template>
                             </v-slider>
                         </v-card-text>
@@ -173,18 +144,18 @@ const initialState = [
     [3, 4, 2, 1, 5, 8, 6, 9, 0]
 ];
 let sudoku = ref(new Sudoku(
-//     [
-//   [0, 3, 0, 0, 0, 0, 0, 0, 0],
-//   [6, 0, 0, 1, 9, 5, 0, 0, 0],
-//   [0, 9, 8, 0, 0, 0, 0, 6, 0],
-//   [8, 0, 0, 0, 6, 0, 0, 0, 3],
-//   [4, 0, 0, 8, 0, 3, 0, 0, 1],
-//   [7, 0, 0, 0, 2, 0, 0, 0, 6],
-//   [0, 6, 0, 0, 0, 0, 2, 8, 0],
-//   [0, 0, 0, 4, 1, 9, 0, 0, 5],
-//   [0, 0, 0, 0, 8, 0, 0, 7, 9]
-// ]
-initialState
+    //     [
+    //   [0, 3, 0, 0, 0, 0, 0, 0, 0],
+    //   [6, 0, 0, 1, 9, 5, 0, 0, 0],
+    //   [0, 9, 8, 0, 0, 0, 0, 6, 0],
+    //   [8, 0, 0, 0, 6, 0, 0, 0, 3],
+    //   [4, 0, 0, 8, 0, 3, 0, 0, 1],
+    //   [7, 0, 0, 0, 2, 0, 0, 0, 6],
+    //   [0, 6, 0, 0, 0, 0, 2, 8, 0],
+    //   [0, 0, 0, 4, 1, 9, 0, 0, 5],
+    //   [0, 0, 0, 0, 8, 0, 0, 7, 9]
+    // ]
+    initialState
 ))
 let generatedSudoku = sudoku.value.copy();
 
@@ -221,24 +192,42 @@ let areYouSureDialog = ref(false);
 let areYouSureText = ref('');
 let areYouSureTitle = ref('');
 let areYouSureIcon = ref('');
-let areYouSureAction = ref(() => {});
+let areYouSureAction = ref(() => { });
 
-const easyDifficulty = ref(43);
-const mediumDifficulty = ref(46);
-const hardDifficulty = ref(49);
+const difficultyOptions = ref([
+    { label: "Easy", value: 43 },
+    { label: "Medium", value: 46 },
+    { label: "Hard", value: 49 }
+])
+let selectedOption = ref(difficultyOptions.value[0].value);
+let sudokuDifficulty = ref(selectedOption.value);
+
+function updatedDifficulty() {
+    let dist = Number.POSITIVE_INFINITY
+    sudokuDifficulty.value = Math.round(sudokuDifficulty.value)
+    for (let option of difficultyOptions.value) {
+        let newDist = Math.abs(option.value - sudokuDifficulty.value)
+        if (newDist < dist) {
+            dist = newDist
+            selectedOption.value = option.value
+        }
+    }
+}
+
 let sudokuGeneratorDialog = ref(false);
-let sudokuDifficulty = ref(easyDifficulty.value);
+
+
 
 function generate() {
     generatedSudoku = new Sudoku();
     generatedSudoku.generate(sudokuDifficulty.value);
-    
+
     sudoku.value = generatedSudoku.copy();
 }
 
 </script>
 
-<style>
+<style scoped>
 .container {
     display: flex;
     justify-content: center;
@@ -249,5 +238,14 @@ function generate() {
 
 .card-actions {
     justify-content: center;
+}
+
+:deep(.v-input__control) {
+    align-items: center;
+}
+    
+:deep(.v-selection-control-group ) {
+    gap: 35px;
+
 }
 </style>
