@@ -12,6 +12,25 @@ const emptyBoard = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
+const hashMatrix: number[][][] = []
+
+function initHashMatrix() {
+    // clear array first
+    hashMatrix.length = 0;
+    for (let i = 0; i < 9; i++) {
+        hashMatrix.push([]);
+        for (let j = 0; j < 9; j++) {
+            hashMatrix[i].push([]);
+            for (let k = 0; k < 10; k++) {
+                hashMatrix[i][j].push(Math.random()*4294967296);
+            }
+        }
+    }
+}
+initHashMatrix()
+
+const sudokuMap = new Map<Sudoku, boolean>()
+
 export function sudokuCellIndices() : number[][] {
     const cellIndices = [];
     for (let i = 0; i < 9; i++) {
@@ -24,19 +43,50 @@ export function sudokuCellIndices() : number[][] {
 
 export default class Sudoku {
     public board: number[][];
+    private hashvalue: number = 0;
     private lastActions: number[][] = [];
-
-
 
     constructor(board: number[][] = emptyBoard) {
         this.board = board.map(row => [...row]);
         if (!this.isValid()) {
             throw new Error('Invalid board');
         }
+        this.hashvalue = this.calculateHash();
+    }
+
+    public calculateHash(): number {
+        let hash = 0;
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+                hash ^= hashMatrix[i][j][this.board[i][j]];
+            }
+        }
+        return hash;
+    }
+
+    public equals(other: Sudoku): boolean {
+        if (this.board.length !== other.board.length) {
+            return false;
+        }
+        for (let i = 0; i < this.board.length; i++) {
+            if (this.board[i].length !== other.board[i].length) {
+                return false;
+            }
+            for (let j = 0; j < this.board[i].length; j++) {
+                if (this.board[i][j] !== other.board[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public hash(): number {
+        return this.hashvalue;
     }
 
     public copy(): Sudoku {
-        // cooy should not throw an error when invalid board
+        // copy should not throw an error when invalid board
         const sudoku = new Sudoku();
         sudoku.board = this.board.map(row => [...row]);
         sudoku.lastActions = this.lastActions.map(action => [...action]);
@@ -45,6 +95,7 @@ export default class Sudoku {
 
     public setCell(row: number, col: number, value: number): void {
         this.lastActions.push([row, col, this.board[row][col]]);
+        this.hashvalue ^= hashMatrix[row][col][this.board[row][col]] ^ hashMatrix[row][col][value];
         this.board[row][col] = value;
     }
 
@@ -169,13 +220,13 @@ export default class Sudoku {
     }
 
     public hasUniqueSolution(): boolean {
-        const newSudoku = this.copy();
-        const possibleMoves = newSudoku.possibleMoves();
+        const possibleMoves = this.possibleMoves();
 
         let solutionFound = false;
         for (const [[i,j], moves] of possibleMoves) {
             let solutions = 0;
             for (const num of moves) {
+                const newSudoku = this.copy();
                 newSudoku.setCell(i, j, num);
                 if (newSudoku.solve()) {
                     solutions++;
@@ -191,6 +242,8 @@ export default class Sudoku {
     }
 
     public solve(randomise: boolean=false): boolean {
+        if (!this.isValid()) return false
+
         const possibleMoves = this.possibleMoves();
         possibleMoves.sort((a, b) => a[1].length - b[1].length);
 
@@ -210,7 +263,8 @@ export default class Sudoku {
             return false;
         }
 
-        return this.isSolved();
+        const solved = this.isSolved()
+        return solved
     }
 
     public generate(emptyCells:number = 6) {
@@ -221,20 +275,27 @@ export default class Sudoku {
         const cellIndices = sudokuCellIndices();
         shuffle(cellIndices);
 
+        let i = 0;
         let j = 0;
-        for (let i = 0; i < emptyCells && j < cellIndices.length; i++) {
-            let hasUniqueSolution = false;
+        while (i < emptyCells && j < cellIndices.length) {
+            const cell = cellIndices[j];
+            const [row, col] = cell;
 
-            for (; j < cellIndices.length; j++) {
-                const cell = cellIndices[j];
-                const [row, col] = cell;
+            const value = this.board[row][col];
+            if (value === 0) {
+                j++;
+                continue;
+            }
 
-                const value = this.board[row][col];
-                this.board[row][col] = 0;
-                hasUniqueSolution = this.hasUniqueSolution();
-                if (!hasUniqueSolution) {
-                    this.board[row][col] = value;
-                }
+            this.board[row][col] = 0;
+            if (this.hasUniqueSolution()) { 
+                // add an empty cell and restart search for a new one to remove
+                i++;
+                j = 0;
+            } else {
+                // restore the value and continue searching
+                this.board[row][col] = value;
+                j++;
             }
         }
     }
