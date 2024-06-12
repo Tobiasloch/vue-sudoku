@@ -88,7 +88,7 @@
                             <v-slider 
                                 @update:model-value="updatedDifficulty" 
                                 v-model="sudokuDifficulty" 
-                                :max="81" 
+                                :max="60" 
                                 :min="1"
                                 :step="1" 
                                 class="align-center"
