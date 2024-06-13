@@ -5,7 +5,7 @@
                 Sudoku
             </v-card-title>
             <v-card-text>
-                <SudokuComponent ref="sudokuComponent" v-model="sudoku" />
+                <SudokuComponent @update:model-value="sudokuUpdated()" ref="sudokuComponent" v-model="sudoku" />
             </v-card-text>
 
             <v-card-actions class="card-actions">
@@ -82,11 +82,11 @@
                         <template v-slot:loader="{ isActive }">
                             <v-progress-linear
                                 :active="isActive"
-                                height="20"
+                                height="5"
                                 :max="sudokuDifficulty"
                                 :model-value="generatorIterations"
                                 :color="selectedDifficulty().color"
-                            ><strong>{{ generatorIterations }}</strong></v-progress-linear>
+                            ></v-progress-linear>
                         </template>
                         <v-card-text>
                             Select the difficulty of the sudoku to generate. The higher the number, the more fields will
@@ -136,6 +136,22 @@
                 </v-dialog>
             </v-card-actions>
         </v-card>
+        <v-snackbar
+            v-model="snackbar.show"
+            :color="snackbar.color"
+        >
+        {{ snackbar.text }}
+
+        <template v-slot:actions>
+            <v-btn
+            color="black"
+            variant="text"
+            @click="snackbar.show = false"
+            >
+            Close
+            </v-btn>
+        </template>
+        </v-snackbar>
     </div>
 </template>
 
@@ -193,6 +209,12 @@ function updatedDifficulty(newValue) {
 
 let sudokuGeneratorDialog = ref(true);
 
+let snackbar = ref({
+    text: '',
+    show: false,
+    color: 'red-darken-1'
+})
+
 async function iterateGenerator() {
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -215,10 +237,26 @@ async function iterateGenerator() {
     })
 } 
 
+function sudokuUpdated() {
+    if (sudoku.value.isSolved()) {
+        snackbar.value.text = 'Congratulations! You have solved the sudoku. Click "Reset" to go back to the generated sudoku.'
+        snackbar.value.show = true
+        snackbar.value.color = 'green-darken-1'
+    }
+}
+
 function solveSudoku() {
-    const solvedSudoku = generatedSudoku.copy()
-    solvedSudoku.solve()
-    sudoku.value = solvedSudoku
+    const solvedSudoku = sudoku.value.copy()
+    if (solvedSudoku.solve()) {
+        sudoku.value = solvedSudoku
+        snackbar.value.text = 'The sudoku has been solved. Click "Reset" to go back to the generated sudoku.'
+        snackbar.value.show = true
+        snackbar.value.color = 'green-darken-1'
+    } else {
+        snackbar.value.text = 'The sudoku is not solvable. Please check your changes or reset the sudoku.'
+        snackbar.value.show = true
+        snackbar.value.color = 'red-darken-1'
+    }
 }
 
 function generate() {

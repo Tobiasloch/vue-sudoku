@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineModel, Ref, ref, watch, defineExpose } from 'vue';
+import { computed, defineModel, Ref, ref, watch, defineEmits, defineExpose } from 'vue';
 import NumpadComponent from './NumpadComponent.vue';
 import Sudoku from '@/models/Sudoku';
 
@@ -66,6 +66,7 @@ class SudokuCell {
   set value(value) {
     this.valid = this.sudoku.isValidMove(this.rowIndex, this.colIndex, value)
     this.sudoku.setCell(this.rowIndex, this.colIndex, value)
+    emit('update:modelValue', reactiveModel.value)
   }
 
   update(newValue:number) {
@@ -78,7 +79,7 @@ class SudokuCell {
     this.overlay = false
   }
 }
-
+const emit = defineEmits(['update:modelValue'])
 const model = defineModel<Sudoku>({
   default: new Sudoku(),
   type: Sudoku,
