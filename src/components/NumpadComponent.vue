@@ -9,7 +9,8 @@
             height="100%"
             @click="model = numbers[rowIndex][colIndex]"
             :style="{
-              fontSize: `${props.fontsize}px`
+              fontSize: `${props.fontsize}px`,
+              padding: `${props.fontsize}px`
             }"
           >
             {{ numbers[rowIndex][colIndex] }}

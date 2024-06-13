@@ -9,11 +9,11 @@
           height="100%"
           :style="{
             background: cell.valid ? (cell.hint ? 'green' : 'inherit') : 'red',
-            fontSize: `${buttonSize}px`
+            padding: 0
           }"
           :readonly="cell.isReadonly"
         >
-          <div v-if="cell.value != 0">
+          <div v-if="cell.value != 0" :style="{fontSize: `${buttonSize}px`}">
             {{ cell.value }}
           </div>
           <v-overlay
@@ -21,7 +21,6 @@
             activator="parent"
             location-strategy="connected"
             location="center"
-            min-width="300%"
           >
             <NumpadComponent 
               @update:modelValue="(newValue:number) => {setBoardValue(cell, newValue)}"
