@@ -155,7 +155,8 @@ const areYouSureItems = ref([
         sudoku.value = generatedSudoku.copy();
     }},
     { title:'Clear', text: 'Are you sure you want to clear the sudoku, such that all fields are empty?', icon: 'mdi-delete', action: () => {
-        sudoku.value = new Sudoku();
+        generatedSudoku = new Sudoku();
+        sudoku.value = generatedSudoku.copy();
     }},
     { title:'Solve', text: 'Are you sure you want to run the solver to completely solve the sudoku for you?', icon: 'mdi-check', action: () => {
         solveSudoku()
