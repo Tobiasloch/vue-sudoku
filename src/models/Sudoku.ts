@@ -12,24 +12,7 @@ const emptyBoard = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ];
 
-const hashMatrix: number[][][] = []
-
-function initHashMatrix() {
-    // clear array first
-    hashMatrix.length = 0;
-    for (let i = 0; i < 9; i++) {
-        hashMatrix.push([]);
-        for (let j = 0; j < 9; j++) {
-            hashMatrix[i].push([]);
-            for (let k = 0; k < 10; k++) {
-                hashMatrix[i][j].push(Math.random()*4294967296);
-            }
-        }
-    }
-}
-initHashMatrix()
-
-const sudokuMap = new Map<Sudoku, boolean>()
+const sudokuMap = new Map<string, boolean>()
 
 const cachedCellIndices = sudokuCellIndices(false)
 export function sudokuCellIndices(cache:boolean=true) : number[][] {
@@ -46,7 +29,6 @@ export function sudokuCellIndices(cache:boolean=true) : number[][] {
 
 export default class Sudoku {
     public board: number[][];
-    private hashvalue: number = 0;
     private lastActions: number[][] = [];
 
     constructor(board: number[][] = emptyBoard) {
@@ -54,38 +36,10 @@ export default class Sudoku {
         if (!this.isValid()) {
             throw new Error('Invalid board');
         }
-        this.hashvalue = this.calculateHash();
     }
 
-    public calculateHash(): number {
-        let hash = 0;
-        for (let i = 0; i < 9; i++) {
-            for (let j = 0; j < 9; j++) {
-                hash ^= hashMatrix[i][j][this.board[i][j]];
-            }
-        }
-        return hash;
-    }
-
-    public equals(other: Sudoku): boolean {
-        if (this.board.length !== other.board.length) {
-            return false;
-        }
-        for (let i = 0; i < this.board.length; i++) {
-            if (this.board[i].length !== other.board[i].length) {
-                return false;
-            }
-            for (let j = 0; j < this.board[i].length; j++) {
-                if (this.board[i][j] !== other.board[i][j]) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    public hash(): number {
-        return this.hashvalue;
+    public hashString(): string {
+        return this.board.map(row => row.join('')).join('');
     }
 
     public copy(): Sudoku {
@@ -98,7 +52,6 @@ export default class Sudoku {
 
     public setCell(row: number, col: number, value: number): void {
         this.lastActions.push([row, col, this.board[row][col]]);
-        this.hashvalue ^= hashMatrix[row][col][this.board[row][col]] ^ hashMatrix[row][col][value];
         this.board[row][col] = value;
     }
 
@@ -231,7 +184,7 @@ export default class Sudoku {
             for (const num of moves) {
                 const newSudoku = this.copy();
                 newSudoku.setCell(i, j, num);
-                if (newSudoku.solve()) {
+                if (newSudoku.solve(false, true)) {
                     solutions++;
                     solutionFound = true;
 
@@ -244,30 +197,43 @@ export default class Sudoku {
         return solutionFound
     }
 
-    public solve(randomise: boolean=false): boolean {
-        if (!this.isValid()) return false
+    public solve(randomise: boolean=false, caching:boolean=false): boolean {
+        const hash = this.hashString()
+        const cachedResult = sudokuMap.get(hash)
+        if (cachedResult === false || (caching && cachedResult === true)) {
+            return cachedResult
+        }
+
+        if (!this.isValid()) {
+            sudokuMap.set(hash, false)
+            return false
+        }
 
         const possibleMoves = this.possibleMoves();
         possibleMoves.sort((a, b) => a[1].length - b[1].length);
 
-        for (const [[i,j], moves] of possibleMoves) {
-            if (randomise) shuffle(moves);
-            
-            for (const num of moves) {
-                this.setCell(i, j, num);
-    
-                if (this.solve(randomise)) {
-                    return true;
-                }
-    
-                this.undo();
-            }
-
-            return false;
+        if (possibleMoves.length === 0) {
+            const solved = this.isSolved()
+            sudokuMap.set(hash, solved)
+            return solved
         }
 
-        const solved = this.isSolved()
-        return solved
+        const [[i,j], moves] = possibleMoves[0]
+        if (randomise) shuffle(moves);
+        
+        for (const num of moves) {
+            this.setCell(i, j, num);
+
+            if (this.solve(randomise, caching)) {
+                sudokuMap.set(hash, true)
+                return true;
+            }
+
+            this.undo();
+        }
+
+        sudokuMap.set(hash, false)
+        return false;
     }
 
     public clearCell(randomise:boolean = true, maintainUniqueness: boolean = true): boolean {

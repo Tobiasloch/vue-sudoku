@@ -82,11 +82,11 @@
                         <template v-slot:loader="{ isActive }">
                             <v-progress-linear
                                 :active="isActive"
-                                height="4"
+                                height="20"
                                 :max="sudokuDifficulty"
                                 :model-value="generatorIterations"
                                 :color="selectedDifficulty().color"
-                            ></v-progress-linear>
+                            ><strong>{{ generatorIterations }}</strong></v-progress-linear>
                         </template>
                         <v-card-text>
                             Select the difficulty of the sudoku to generate. The higher the number, the more fields will
@@ -110,7 +110,7 @@
 
                             <v-slider 
                                 @update:model-value="updatedDifficulty" 
-                                v-model="sudokuDifficulty" 
+                                :model-value="sudokuDifficulty"
                                 :max="60" 
                                 :min="1"
                                 :step="1" 
@@ -178,9 +178,9 @@ function selectedDifficulty() {
 let sudokuDifficulty = ref(selectedOption.value);
 let generatorIterations = ref(0);
 
-function updatedDifficulty() {
+function updatedDifficulty(newValue) {
     let dist = Number.POSITIVE_INFINITY
-    sudokuDifficulty.value = Math.round(sudokuDifficulty.value)
+    sudokuDifficulty.value = newValue
     for (let option of difficultyOptions.value) {
         let newDist = Math.abs(option.value - sudokuDifficulty.value)
         if (newDist < dist) {
@@ -199,8 +199,11 @@ async function iterateGenerator() {
         }, 0)
     }).then(() => {
         if (generatorIterations.value < sudokuDifficulty.value && sudokuGeneratorDialog.value) {
-            generatedSudoku.clearCell(true, true)
-            generatorIterations.value++
+            if (generatedSudoku.clearCell(true, true)) {
+                generatorIterations.value++
+            } else {
+                generatorIterations.value = sudokuDifficulty.value
+            }
 
             iterateGenerator()
         } else {
