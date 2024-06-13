@@ -126,11 +126,6 @@ function undo() {
   resetCells()
 }
 
-function solve() {
-  reactiveModel.value.solve()
-  resetCells()
-}
-
 function resetCells() {
   for (let row of cells.value) {
     for (let cell of row) {
@@ -141,7 +136,7 @@ function resetCells() {
 }
 
 defineExpose({
-  undo, showHint, solve
+  undo, showHint
 })
 
 

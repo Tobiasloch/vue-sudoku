@@ -158,7 +158,7 @@ const areYouSureItems = ref([
         sudoku.value = new Sudoku();
     }},
     { title:'Solve', text: 'Are you sure you want to run the solver to completely solve the sudoku for you?', icon: 'mdi-check', action: () => {
-        sudokuComponent.value.solve();
+        solveSudoku()
     } },
 ]);
 
@@ -213,6 +213,12 @@ async function iterateGenerator() {
         }
     })
 } 
+
+function solveSudoku() {
+    const solvedSudoku = generatedSudoku.copy()
+    solvedSudoku.solve()
+    sudoku.value = solvedSudoku
+}
 
 function generate() {
     generatedSudoku = new Sudoku();
