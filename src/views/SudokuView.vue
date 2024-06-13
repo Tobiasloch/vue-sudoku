@@ -82,10 +82,10 @@
                         <template v-slot:loader="{ isActive }">
                             <v-progress-linear
                                 :active="isActive"
-                                color="deep-purple"
                                 height="4"
                                 :max="sudokuDifficulty"
                                 :model-value="generatorIterations"
+                                :color="selectedDifficulty().color"
                             ></v-progress-linear>
                         </template>
                         <v-card-text>
@@ -93,12 +93,18 @@
                             be filled in
                             for you.
 
-                            <v-radio-group inline v-model="selectedOption" center-affix @update:model-value="sudokuDifficulty = selectedOption">
+                            <v-radio-group 
+                                :inline="windowWidth > 600"
+                                v-model="selectedOption" 
+                                center-affix 
+                                @update:model-value="sudokuDifficulty = selectedOption"
+                            >
                                 <v-radio 
                                     v-for="option in difficultyOptions" 
                                     :key="option.value" 
                                     :label="option.label"
                                     :value="option.value"
+                                    :color="selectedDifficulty().color"
                                 ></v-radio>
                             </v-radio-group>
 
@@ -110,17 +116,9 @@
                                 :step="1" 
                                 class="align-center"
                                 hide-details
+                                thumb-label="always"
+                                :color="selectedDifficulty().color"
                             >
-                                <template v-slot:append>
-                                    <v-text-field 
-                                        @update:model-value="updatedDifficulty" 
-                                        v-model="sudokuDifficulty" 
-                                        type="number" 
-                                        hide-details 
-                                        single-line
-                                        width="80px"
-                                    ></v-text-field>
-                                </template>
                             </v-slider>
                         </v-card-text>
                         <template v-slot:actions>
@@ -168,11 +166,15 @@ let areYouSureDialog = ref(false);
 let areYouSureObject = ref(null);
 
 const difficultyOptions = ref([
-    { label: "Easy", value: 43 },
-    { label: "Medium", value: 46 },
-    { label: "Hard", value: 49 }
+    { label: "Easy", value: 35, color: "green-darken-1" },
+    { label: "Medium", value: 42, color: "orange-darken-1" },
+    { label: "Hard", value: 49, color: "red-darken-1" }
 ])
 let selectedOption = ref(difficultyOptions.value[0].value);
+function selectedDifficulty() {
+    return difficultyOptions.value.find(option => option.value === selectedOption.value)
+}
+
 let sudokuDifficulty = ref(selectedOption.value);
 let generatorIterations = ref(0);
 
@@ -216,6 +218,11 @@ function generate() {
     iterateGenerator()
 }
 
+let windowWidth = ref(window.innerWidth || 0);
+window.addEventListener('resize', () => {
+    this.windowWidth.value = window.innerWidth || 0;
+    });
+
 </script>
 
 <style scoped>
@@ -223,7 +230,6 @@ function generate() {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: 500px;
     height: 100vh;
 }
 
@@ -234,9 +240,17 @@ function generate() {
 :deep(.v-input__control) {
     align-items: center;
 }
+
+@media (max-width: 600px) {
+    :deep(.v-input__control) {
+        align-items: start;
+    }
+}
     
 :deep(.v-selection-control-group ) {
-    gap: 35px;
+    column-gap: 35px;
 
 }
+
+
 </style>
