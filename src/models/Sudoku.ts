@@ -160,16 +160,19 @@ export default class Sudoku {
     }
 
 
-    public getHint():number[]|undefined {
+    public getHint(row?: number|undefined, col?: number|undefined):number[]|undefined {
         if (!this.isValid()) return undefined
         
-        const emptyCells = this.emptyCells();
-        if (emptyCells.length === 0) return undefined
-
-        const [i, j] = emptyCells[0]
+        if (row === undefined || col === undefined) {
+            const emptyCells = this.emptyCells();
+            if (emptyCells.length === 0) return undefined
+    
+            row = emptyCells[0][0];
+            col = emptyCells[0][1];
+        }
         const newSudoku = this.copy();
         if (newSudoku.solve()) {
-            return [i, j, newSudoku.board[i][j]]
+            return [row, col, newSudoku.board[row][col]]
         }
 
         return undefined

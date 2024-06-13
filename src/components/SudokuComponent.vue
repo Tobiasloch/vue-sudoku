@@ -113,7 +113,19 @@ function setBoardValue(cell:SudokuCell, value:number) {
 }
 
 function showHint() {
-  const hint = reactiveModel.value.getHint()
+  let rowIndex: number|undefined = undefined
+  let colIndex: number|undefined = undefined;
+  cells.value.forEach(row => {
+    row.forEach(cell => {
+      if (!cell.valid) {
+        cell.value = cell.initialValue;
+        colIndex = cell.colIndex;
+        rowIndex = cell.rowIndex;
+      }
+    })
+  })
+
+  const hint = reactiveModel.value.getHint(rowIndex, colIndex)
   if (hint) {
     resetCells();
     const [row, col, value] = hint
