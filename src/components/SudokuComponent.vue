@@ -106,11 +106,8 @@ function setBoardValue(cell:SudokuCell, value:number) {
   }
 
   const isValid = reactiveModel.value.isValid()
-  if (isValid || reactiveModel.value.isValidMove(cell.rowIndex, cell.colIndex, value)) {
+  if (isValid || !cell.valid) {
     cell.value = value
-    if (!isValid) {
-      resetCells()
-    }
   }
 }
 
