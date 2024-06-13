@@ -72,7 +72,7 @@
                 <v-dialog 
                     v-model="sudokuGeneratorDialog" 
                     max-width="600"
-                    :persistent="generatorIterations > 0"
+                    :persistent="generatorIterations > 0 || sudoku.emptyCells().length >= 9*9"
                 >
                     <v-card 
                         :loading="generatorIterations > 0" 
