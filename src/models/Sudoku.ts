@@ -31,7 +31,10 @@ initHashMatrix()
 
 const sudokuMap = new Map<Sudoku, boolean>()
 
-export function sudokuCellIndices() : number[][] {
+const cachedCellIndices = sudokuCellIndices(false)
+export function sudokuCellIndices(cache:boolean=true) : number[][] {
+    if (cache) return cachedCellIndices.map(cell => [...cell])
+
     const cellIndices = [];
     for (let i = 0; i < 9; i++) {
         for (let j = 0; j < 9; j++) {
@@ -267,36 +270,31 @@ export default class Sudoku {
         return solved
     }
 
+    public clearCell(randomise:boolean = true, maintainUniqueness: boolean = true): boolean {
+        const cellIndices = sudokuCellIndices();
+        if (randomise) shuffle(cellIndices);
+
+        for (const [i, j] of cellIndices) {
+            const value = this.board[i][j];
+            if (value === 0) continue;
+
+            this.board[i][j] = 0;
+            if (maintainUniqueness && this.hasUniqueSolution()) {
+                return true;
+            }
+            this.board[i][j] = value;
+        }
+
+        return false;
+    }
+
     public generate(emptyCells:number = 6) {
         this.board = emptyBoard.map(row => [...row]);
 
         this.solve(true);
 
-        const cellIndices = sudokuCellIndices();
-        shuffle(cellIndices);
-
-        let i = 0;
-        let j = 0;
-        while (i < emptyCells && j < cellIndices.length) {
-            const cell = cellIndices[j];
-            const [row, col] = cell;
-
-            const value = this.board[row][col];
-            if (value === 0) {
-                j++;
-                continue;
-            }
-
-            this.board[row][col] = 0;
-            if (this.hasUniqueSolution()) { 
-                // add an empty cell and restart search for a new one to remove
-                i++;
-                j = 0;
-            } else {
-                // restore the value and continue searching
-                this.board[row][col] = value;
-                j++;
-            }
+        for (let i = 0; i < emptyCells; i++) {
+            this.clearCell(true, true);
         }
     }
 }

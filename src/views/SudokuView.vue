@@ -70,7 +70,16 @@
                 </v-dialog>
 
                 <v-dialog v-model="sudokuGeneratorDialog" max-width="600">
-                    <v-card prepend-icon="mdi-shuffle" title="Generate new sudoku?">
+                    <v-card :loading="generatorIterations > 0" prepend-icon="mdi-shuffle" title="Generate new sudoku?">
+                        <template v-slot:loader="{ isActive }">
+                            <v-progress-linear
+                                :active="isActive"
+                                color="deep-purple"
+                                height="4"
+                                :max="sudokuDifficulty"
+                                :model-value="generatorIterations"
+                            ></v-progress-linear>
+                        </template>
                         <v-card-text>
                             Select the difficulty of the sudoku to generate. The higher the number, the more fields will
                             be filled in
@@ -109,11 +118,11 @@
                         <template v-slot:actions>
                             <v-spacer></v-spacer>
 
-                            <v-btn @click="sudokuGeneratorDialog = false">
+                            <v-btn @click="sudokuGeneratorDialog = false;generatorIterations = sudokuDifficulty">
                                 Cancel
                             </v-btn>
 
-                            <v-btn color="primary" @click="sudokuGeneratorDialog = false; generate()">
+                            <v-btn color="primary" @click="generate();">
                                 Generate
                             </v-btn>
                         </template>
@@ -201,6 +210,7 @@ const difficultyOptions = ref([
 ])
 let selectedOption = ref(difficultyOptions.value[0].value);
 let sudokuDifficulty = ref(selectedOption.value);
+let generatorIterations = ref(0);
 
 function updatedDifficulty() {
     let dist = Number.POSITIVE_INFINITY
@@ -216,13 +226,30 @@ function updatedDifficulty() {
 
 let sudokuGeneratorDialog = ref(false);
 
+async function iterateGenerator() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve()
+        }, 0)
+    }).then(() => {
+        if (generatorIterations.value < sudokuDifficulty.value) {
+            generatedSudoku.clearCell(true, true)
+            generatorIterations.value++
 
+            iterateGenerator()
+        } else {
+            sudoku.value = generatedSudoku.copy()
+            sudokuGeneratorDialog.value = false
+            generatorIterations.value = 0
+        }
+    })
+} 
 
 function generate() {
     generatedSudoku = new Sudoku();
-    generatedSudoku.generate(sudokuDifficulty.value);
+    generatedSudoku.solve(true)
 
-    sudoku.value = generatedSudoku.copy();
+    iterateGenerator()
 }
 
 </script>
