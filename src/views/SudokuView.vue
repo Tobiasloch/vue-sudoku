@@ -59,9 +59,7 @@
                             ></v-progress-linear>
                         </template>
                         <v-card-text>
-                            Select the difficulty of the sudoku to generate. The higher the number, the more fields will
-                            be filled in
-                            for you.
+                            Below you can set the difficulty of the generated sudoku. The higher the number, the more fields will need to be filled in by you.
 
                             <v-radio-group 
                                 :inline="windowWidth > 600"
