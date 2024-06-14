@@ -144,7 +144,7 @@ const toolbarActions = ref([
 ])
 
 const areYouSureItems = ref([
-    { title:'Reset', text: 'Are you sure you want to reset the state of the sudoku to the generated one?', icon: 'mdi-reload', action: () => {
+    { title:'Reset', text: 'Are you sure you want to reset the state of the sudoku to the last generated one?', icon: 'mdi-reload', action: () => {
         sudoku.value = generatedSudoku.copy();
     }},
     { title:'Clear', text: 'Are you sure you want to clear the sudoku, such that all fields are empty?', icon: 'mdi-delete', action: () => {
