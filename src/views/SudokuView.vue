@@ -9,46 +9,16 @@
             </v-card-text>
 
             <v-card-actions class="card-actions">
-                <v-tooltip text="Generate" location="top">
+                <v-tooltip 
+                    v-for="action in toolbarActions" 
+                    :model-value="action.tooltip" 
+                    :key="action.tooltiptext" 
+                    :text="action.tooltiptext" 
+                    location="top"
+                >
                     <template v-slot:activator="{ props }">
-                        <v-btn icon @click="sudokuGeneratorDialog = true" v-bind="props">
-                            <v-icon>mdi-shuffle</v-icon>
-                        </v-btn>
-                    </template>
-                </v-tooltip>
-                <v-tooltip text="Undo" location="top">
-                    <template v-slot:activator="{ props }">
-                        <v-btn icon @click="sudokuComponent.undo()" v-bind="props">
-                            <v-icon>mdi-undo</v-icon>
-                        </v-btn>
-                    </template>
-                </v-tooltip>
-                <v-tooltip text="Hint" location="top">
-                    <template v-slot:activator="{ props }">
-                        <v-btn icon @click="sudokuComponent.showHint()" v-bind="props">
-                            <v-icon>mdi-lightbulb</v-icon>
-                        </v-btn>
-                    </template>
-                </v-tooltip>
-
-                <v-tooltip text="Solve" location="top">
-                    <template v-slot:activator="{ props }">
-                        <v-btn icon @click="areYouSureObject = areYouSureItems[2]; areYouSureDialog = true" v-bind="props">
-                            <v-icon>mdi-check</v-icon>
-                        </v-btn>
-                    </template>
-                </v-tooltip>
-                <v-tooltip text="Clear" location="top">
-                    <template v-slot:activator="{ props }">
-                        <v-btn icon @click="areYouSureObject = areYouSureItems[1]; areYouSureDialog = true" v-bind="props">
-                            <v-icon>mdi-delete</v-icon>
-                        </v-btn>
-                    </template>
-                </v-tooltip>
-                <v-tooltip text="Reset" location="top">
-                    <template v-slot:activator="{ props }">
-                        <v-btn icon @click="areYouSureObject = areYouSureItems[0]; areYouSureDialog = true" v-bind="props">
-                            <v-icon>mdi-reload</v-icon>
+                        <v-btn icon @click="action.action()" v-bind="props">
+                            <v-icon>{{action.icon}}</v-icon>
                         </v-btn>
                     </template>
                 </v-tooltip>
@@ -165,6 +135,15 @@ const sudokuComponent = ref(null);
 // have a nearly solved sudoku board as initial state with only 5 cells left to solve
 let sudoku = ref(new Sudoku())
 let generatedSudoku = sudoku.value.copy();
+
+const toolbarActions = ref([
+    { icon: 'mdi-shuffle', tooltiptext: 'Generate', tooltip:false, action: () => { sudokuGeneratorDialog.value = true }},
+    { icon: 'mdi-undo', tooltiptext: 'Undo', tooltip:false, action: () => { sudokuComponent.value.undo() }},
+    { icon: 'mdi-lightbulb', tooltiptext: 'Hint', tooltip:false, action: () => { sudokuComponent.value.showHint() } },
+    { icon: 'mdi-check', tooltiptext: 'Solve', tooltip:false, action: () => { areYouSureObject.value = areYouSureItems.value[2]; areYouSureDialog.value = true } },
+    { icon: 'mdi-delete', tooltiptext: 'Clear', tooltip:false, action: () => { areYouSureObject.value = areYouSureItems.value[1]; areYouSureDialog.value = true } },
+    { icon: 'mdi-reload', tooltiptext: 'Reset', tooltip:false, action: () => { areYouSureObject.value = areYouSureItems.value[0]; areYouSureDialog.value = true } },
+])
 
 const areYouSureItems = ref([
     { title:'Reset', text: 'Are you sure you want to reset the state of the sudoku to the generated one?', icon: 'mdi-reload', action: () => {
