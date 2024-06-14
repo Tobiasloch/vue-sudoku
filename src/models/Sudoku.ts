@@ -155,7 +155,8 @@ export default class Sudoku {
             } else {
                 possibleMoves.push([[i,j],[this.board[i][j]]]);
             }
-        }   
+        }
+        possibleMoves.sort((a, b) => a[1].length - b[1].length);
         return possibleMoves;
     }
 
@@ -164,11 +165,11 @@ export default class Sudoku {
         if (!this.isValid()) return undefined
         
         if (row === undefined || col === undefined) {
-            const emptyCells = this.emptyCells();
-            if (emptyCells.length === 0) return undefined
+            const possibleMoves = this.possibleMoves();
+            if (possibleMoves.length === 0) return undefined
     
-            row = emptyCells[0][0];
-            col = emptyCells[0][1];
+            row = possibleMoves[0][0][0];
+            col = possibleMoves[0][0][1];
         }
         const newSudoku = this.copy();
         if (newSudoku.solve()) {
@@ -213,7 +214,6 @@ export default class Sudoku {
         }
 
         const possibleMoves = this.possibleMoves();
-        possibleMoves.sort((a, b) => a[1].length - b[1].length);
 
         if (possibleMoves.length === 0) {
             const solved = this.isSolved()
