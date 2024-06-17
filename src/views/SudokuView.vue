@@ -243,9 +243,9 @@ function generate() {
     iterateGenerator()
 }
 
-let windowWidth = ref(window.innerWidth || 0);
+let windowWidth = ref(window.innerWidth);
 window.addEventListener('resize', () => {
-    this.windowWidth.value = window.innerWidth || 0;
+    windowWidth.value = window.innerWidth;
     });
 
 </script>
