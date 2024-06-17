@@ -64,11 +64,11 @@ export default class Sudoku {
     }
 
     public getRow(row: number): number[] {
-        return this.board[row];
+        return [...this.board[row]];
     }
 
     public getColumn(col: number): number[] {
-        return this.board.map(row => row[col]);
+        return [...this.board.map(row => row[col])];
     }
 
     public getBox(row: number, col: number): number[] {
@@ -85,39 +85,43 @@ export default class Sudoku {
         return box;
     }
 
+    public conflictingCells(): number[][] {
+        const conflicts = []
+
+        for (const [i, j] of sudokuCellIndices()) {
+            const value = this.board[i][j]
+            if (value === 0) continue;
+
+            if (!this.isValidMove(i, j, value)) {
+                conflicts.push([i,j])
+            }
+        }
+
+        return conflicts
+    }
+
     public isValid(): boolean {
         if (this.board.length !== 9) {
             return false;
         }
-        for (let i = 0; i < this.board.length; i++) {
-            if (this.board[i].length !== 9) {
+        for (const [i,j] of sudokuCellIndices()) {
+            // invalid size or invalid value in the cell
+            if (this.board[i].length !== 9 || this.board[i][j] < 0 || this.board[i][j] > 9) {
                 return false;
-            }
-            for (let j = 0; j < this.board[i].length; j++) {
-                if (this.board[i][j] < 0 || this.board[i][j] > 9) {
-                    return false;
-                }
-
-                const num = this.board[i][j];
-                if (num === 0) continue;
-                
-                this.board[i][j] = 0;
-                const isValidMove = this.isValidMove(i, j, num)
-                this.board[i][j] = num;
-
-                if (!isValidMove) {
-                    return false;
-                }
             }
         }
 
-        return true;
+        return this.conflictingCells().length === 0;
     }
 
     public isValidMove(row: number, col: number, num: number): boolean {
+        // removing the number from the row, column and box and checking if the number is not present
         const rowValues = this.getRow(row);
+        rowValues.splice(col, 1);
         const colValues = this.getColumn(col);
+        colValues.splice(row, 1);
         const boxValues = this.getBox(row, col);
+        boxValues.splice(boxValues.indexOf(num), 1);
 
         return !rowValues.includes(num) && !colValues.includes(num) && !boxValues.includes(num);
     }

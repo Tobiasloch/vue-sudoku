@@ -13,3 +13,15 @@ export function shuffle(array: Array<any>) : void {
         array[randomIndex], array[currentIndex]];
     }
   }
+
+export function findAllOccurances(array: Array<any>, val: any): Array<any> {
+  const occurances = []
+
+  for (let i = 0; i < array.length; i++) {
+    if (array[i] === val) {
+      occurances.push(i)
+    }
+  }
+
+  return occurances
+}

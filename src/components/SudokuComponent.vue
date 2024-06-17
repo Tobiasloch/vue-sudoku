@@ -11,7 +11,7 @@
             background: cell.valid ? (cell.hint ? 'green' : 'inherit') : 'red',
             padding: 0
           }"
-          :readonly="cell.isReadonly"
+          :readonly="cell.isReadonly || (!sudokuIsValid && cell.valid)"
         >
           <div v-if="cell.value != 0" :style="{fontSize: `${buttonSize}px`}">
             {{ cell.value }}
@@ -96,6 +96,7 @@ watch(() => reactiveModel.value,
         return new SudokuCell(reactiveModel.value, rowIndex, colIndex)
       })
     })
+    updateInValid()
   },
   { immediate: true }
 )
@@ -106,10 +107,8 @@ function setBoardValue(cell:SudokuCell, value:number) {
     return
   }
 
-  const isValid = reactiveModel.value.isValid()
-  if (isValid || !cell.valid) {
-    cell.value = value
-  }
+  cell.value = value
+  updateInValid()
 }
 
 function showHint() {
@@ -137,14 +136,24 @@ function showHint() {
 function undo() {
   reactiveModel.value.undo()
   resetCells()
+  updateInValid()
 }
 
-function resetCells() {
+function resetCells(resetValid:boolean = true, resetHint:boolean = true) {
   for (let row of cells.value) {
     for (let cell of row) {
-      cell.valid = true
-      cell.hint = false
+      if (resetValid) cell.valid = true
+      if (resetHint) cell.hint = false
     }
+  }
+}
+
+function updateInValid() {
+  const conflicts = reactiveModel.value.conflictingCells()
+
+  resetCells(true, false)
+  for (let [rowIndex,colIndex] of conflicts) {
+    cells.value[rowIndex][colIndex].valid = false
   }
 }
 
@@ -152,6 +161,9 @@ defineExpose({
   undo, showHint
 })
 
+const sudokuIsValid = computed(() => {
+  return reactiveModel.value.isValid()
+})
 
 const sudokuContainer = ref<HTMLDivElement | null>(null)
 const buttonSize = computed(() => {
