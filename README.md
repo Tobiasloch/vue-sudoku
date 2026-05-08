@@ -1,5 +1,11 @@
 # vue-sudoku
 
+
+| Generate Sudoku | Solve it yourself |
+|--------|--------|
+| ![Generate Sudoku](./screenshots/screenshot_init_generate.png) | ![Solve it](./screenshots/screenshot_start.png) |
+
+
 This is a test project which i created to learn a bit of vue3. It contains a Sudoku component which simulates the game for playing it yourself. Click [here](https://tobiasloch.github.io/vue-sudoku/) to try it out yourself.
 
 ## Project setup
