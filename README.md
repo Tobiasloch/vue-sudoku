@@ -1,7 +1,6 @@
 # vue-sudoku
 
-
-| Generate Sudoku | Solve it yourself |
+| Generate Sudoku | Solve it |
 |--------|--------|
 | ![Generate Sudoku](./screenshots/screenshot_init_generate.png) | ![Solve it](./screenshots/screenshot_start.png) |
 
